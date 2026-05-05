@@ -14,7 +14,7 @@ import { validateGridText } from "./lib/gridValidation";
 import type { CodeEvaluationResponse, SearchAlgorithm, SearchResponse } from "./lib/types";
 
 export function App() {
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState<SearchAlgorithm>("forward");
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState<SearchAlgorithm>("dijkstra");
   const [gridText, setGridText] = useState(defaultGrid);
   const [graphText, setGraphText] = useState(defaultWeightedGraph);
   const [result, setResult] = useState<SearchResponse | null>(null);
@@ -39,17 +39,6 @@ export function App() {
   const canRun = usesWeightedGraph ? !graphError : !gridError && Boolean(code.trim());
   const frameCount = result?.trace.length ?? 0;
   const frame = result?.trace[Math.min(frameIndex, Math.max(frameCount - 1, 0))] ?? null;
-
-  useEffect(() => {
-    void (async () => {
-      const defaultCode = await loadDefaultCode(selectedAlgorithm);
-      if (defaultCode) {
-        await runSearch(defaultCode);
-      }
-    })();
-    // The first load should use the default grid only once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!playing || frameCount <= 1) {
@@ -160,6 +149,7 @@ export function App() {
   function selectAlgorithm(algorithm: SearchAlgorithm) {
     const nextContent = algorithms.find((item) => item.id === algorithm) ?? algorithms[0];
     setSelectedAlgorithm(algorithm);
+    setResult(null);
     setFrameIndex(0);
     setPlaying(false);
     setEvaluation(null);
@@ -168,7 +158,6 @@ export function App() {
       void loadDefaultCode(algorithm);
     } else {
       setCode("");
-      void runSearch(undefined, algorithm);
     }
   }
 
@@ -242,7 +231,7 @@ export function App() {
 
         <section className="main-column">
           {usesWeightedGraph ? (
-            <WeightedGraphVisualization result={result} frame={frame} />
+            <WeightedGraphVisualization result={result} frame={frame} initialGraph={graphParse.graph} />
           ) : (
             <GridVisualization result={result} frame={frame} gridText={gridText} />
           )}

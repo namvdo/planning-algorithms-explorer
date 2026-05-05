@@ -192,7 +192,7 @@ describe("App", () => {
 
   it("uses the selected algorithm and editor code for visualization", async () => {
     render(<App />);
-    await screen.findByText("Frame 2 of 2");
+    expect(screen.getByText("No trace")).toBeInTheDocument();
     vi.mocked(fetch).mockClear();
 
     fireEvent.click(screen.getByRole("button", { name: /Backward Backward Search/i }));
@@ -209,7 +209,8 @@ describe("App", () => {
 
   it("validates malformed grids before running", async () => {
     render(<App />);
-    await screen.findByText("Frame 2 of 2");
+    fireEvent.click(screen.getByRole("button", { name: /Forward Forward Search/i }));
+    await waitFor(() => expect(vi.mocked(fetch).mock.calls.some((call) => String(call[0]).includes("/code/default/forward"))).toBe(true));
 
     fireEvent.change(screen.getByLabelText("Grid editor"), { target: { value: "S\nGG" } });
 
@@ -219,6 +220,9 @@ describe("App", () => {
 
   it("steps and resets trace frames", async () => {
     render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /Forward Forward Search/i }));
+    await waitFor(() => expect(vi.mocked(fetch).mock.calls.some((call) => String(call[0]).includes("/code/default/forward"))).toBe(true));
+    fireEvent.click(screen.getByRole("button", { name: /^Run$/i }));
     await screen.findByText("Frame 2 of 2");
 
     fireEvent.click(screen.getByRole("button", { name: /^Reset$/i }));
@@ -238,16 +242,16 @@ describe("App", () => {
     render(<App />);
 
     expect(await screen.findByText("Run Stats")).toBeInTheDocument();
-    expect(screen.getByText("Time O(|S| + |E|), space O(|S|). In a tree with branching factor b and solution depth d, the common bound is O(b^d).")).toBeInTheDocument();
-    expect(screen.getByText("Expanded")).toBeInTheDocument();
+    expect(screen.getByText("Time O((|S| + |E|) log |S|) with a binary heap, space O(|S| + |E|).")).toBeInTheDocument();
     expect(screen.queryByText("Good fit")).not.toBeInTheDocument();
     expect(screen.getByText("Pseudocode")).toBeInTheDocument();
-    expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("No run yet.")).toBeInTheDocument();
   });
 
   it("evaluates the exact Python3 editor code", async () => {
     render(<App />);
-    await screen.findByText("Frame 2 of 2");
+    fireEvent.click(screen.getByRole("button", { name: /Forward Forward Search/i }));
+    await waitFor(() => expect(vi.mocked(fetch).mock.calls.some((call) => String(call[0]).includes("/code/default/forward"))).toBe(true));
     vi.mocked(fetch).mockClear();
 
     fireEvent.change(screen.getByLabelText("Python3 live code editor"), {
@@ -262,7 +266,7 @@ describe("App", () => {
 
   it("uses dark theme by default and toggles the whole app theme", async () => {
     const { container } = render(<App />);
-    await screen.findByText("Frame 2 of 2");
+    await screen.findByText("No trace");
 
     expect(container.querySelector(".app-shell")).toHaveClass("theme-dark");
     fireEvent.click(screen.getByLabelText("Toggle app theme"));
@@ -273,7 +277,8 @@ describe("App", () => {
 
   it("reruns visualization when running code evaluation", async () => {
     render(<App />);
-    await screen.findByText("Frame 2 of 2");
+    fireEvent.click(screen.getByRole("button", { name: /Forward Forward Search/i }));
+    await waitFor(() => expect(vi.mocked(fetch).mock.calls.some((call) => String(call[0]).includes("/code/default/forward"))).toBe(true));
     vi.mocked(fetch).mockClear();
 
     fireEvent.click(screen.getByRole("button", { name: /Run Code/i }));
@@ -285,10 +290,11 @@ describe("App", () => {
 
   it("runs weighted graph algorithms through the graph trace endpoint", async () => {
     render(<App />);
-    await screen.findByText("Frame 2 of 2");
+    await screen.findByText("No trace");
+    expect(vi.mocked(fetch).mock.calls.some((call) => String(call[0]).includes("/search/trace"))).toBe(false);
     vi.mocked(fetch).mockClear();
 
-    fireEvent.click(screen.getByRole("button", { name: /Dijkstra Dijkstra's Algorithm/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Run$/i }));
 
     await screen.findAllByText("Weighted Graph");
     await screen.findAllByText("Optimal path S -> B -> G has total cost 5.");

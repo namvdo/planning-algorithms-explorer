@@ -1,12 +1,13 @@
-import type { GraphNode, GraphNodeLabel, GraphTraceEdge, SearchResponse, TraceFrame, WeightedGraphEdge } from "../lib/types";
+import type { GraphNode, GraphNodeLabel, GraphTraceEdge, SearchResponse, TraceFrame, WeightedGraphEdge, WeightedGraphProblem } from "../lib/types";
 
 interface Props {
   result: SearchResponse | null;
   frame: TraceFrame | null;
+  initialGraph: WeightedGraphProblem | null;
 }
 
-export function WeightedGraphVisualization({ result, frame }: Props) {
-  const graph = result?.graph;
+export function WeightedGraphVisualization({ result, frame, initialGraph }: Props) {
+  const graph = result?.graph ?? initialGraph;
   const nodes = graph?.nodes ?? [];
   const edges = graph?.edges ?? [];
   const labels = new Map((frame?.node_labels ?? []).map((label) => [label.node_id, label]));
