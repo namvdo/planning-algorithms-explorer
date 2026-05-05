@@ -54,6 +54,60 @@ The first MVP reports:
 
 These metrics are good for learning because they connect the visual behavior to computational cost. Later versions can add runtime, memory estimates, weighted costs, and comparisons across algorithms.
 
+## Weighted Graph Algorithms
+
+The weighted algorithms use a directed graph instead of the grid world. This is a better visual model for Dijkstra, A\*, and value iteration because the edge cost is the main object being reasoned about. A weighted grid can still be derived later by treating each cell as a node and each move as a weighted edge, but the node-link graph is clearer for the learning interface that we want to build.
+
+The weighted graph view shows:
+
+- edge costs directly on the graph
+- the current node being expanded or updated
+- the active edge relaxation
+- open/frontier nodes and settled nodes
+- per-node labels such as `g`, `h`, `f`, or `V`
+- parent edges for shortest-path reconstruction
+- policy edges for backward value iteration
+
+### Dijkstra
+
+Dijkstra computes the optimal cost-to-come `g(x)` from the start to each node. The priority queue is ordered by the smallest known `g` value. When a node is settled, its `g` value is final. The main visual event is edge relaxation:
+
+```text
+g(x') = min(g(x'), g(x) + cost(x, x'))
+```
+
+The visualization should make it clear that Dijkstra expands outward by cost, not by number of edges.
+
+### A\*
+
+A\* also maintains `g(x)`, but the queue is ordered by:
+
+```text
+f(x) = g(x) + h(x)
+```
+
+The heuristic `h(x)` estimates the remaining cost to the goal. In the sample graph, each node has a heuristic value in the graph JSON. The important learning point is that A\* is still doing relaxation, but the priority queue is biased toward nodes that appear closer to the goal.
+
+### Forward Value Iteration
+
+Forward value iteration computes cost-to-come values from the start by repeated Bellman updates over incoming edges:
+
+```text
+g(x') = min over predecessors x of g(x) + cost(x, x')
+```
+
+The visualization shows sweeps and changed node values. This helps distinguish value iteration from queue-based graph search: it repeatedly improves a value function until no update changes the result.
+
+### Backward Value Iteration
+
+Backward value iteration anchors the goal at `V(goal) = 0` and computes cost-to-go:
+
+```text
+V(x) = min over successors x' of cost(x, x') + V(x')
+```
+
+The policy arrows show which successor currently gives the best cost-to-go. Once the values converge, following the policy from the start gives the optimal path.
+
 ## References
 
 - Steven M. LaValle, _Planning Algorithms_, Chapter 2: Discrete Planning, Cambridge University Press, 2006.

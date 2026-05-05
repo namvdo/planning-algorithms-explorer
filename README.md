@@ -1,6 +1,6 @@
 # Planning Algorithms Explorer
 
-An interactive web application for learning and visualizing algorithms from Steven M. LaValle's _Planning Algorithms_. The first milestone focuses on Chapter 2, discrete planning, with forward search, backward search, and bidirectional search on editable grid worlds.
+An interactive web application for learning and visualizing algorithms from Steven M. LaValle's _Planning Algorithms_. The first milestone focuses on Chapter 2, discrete planning, with grid search algorithms and weighted graph algorithms.
 
 ![Planning Explorer Interface](docs/planning-explorer-interface.png)
 
@@ -74,14 +74,17 @@ Vercel builds `frontend/dist` and routes `/api/*` to the FastAPI app. See `docs/
 The current application implements a Chapter 2 workbench:
 
 - choose forward, backward, or bidirectional search
+- choose Dijkstra, A*, forward value iteration, or backward value iteration on a weighted graph
 - edit a grid with `S`, `G`, `.`, and `#`
+- edit a directed weighted graph as JSON, including edge costs and optional A* heuristic values
 - run the exact Python3 code currently in the live editor
 - inspect the returned trace frame by frame
 - compare the explored visited nodes against the final plan
+- inspect weighted graph relaxations, priority queue state, node values, parent edges, and policy edges
 - read short explanations, complexity notes, LaTeX-rendered pseudocode, and source citations
 - edit the selected Python3 algorithm implementation and run it through the local judge
 
-The Python backend is the source of truth for execution and judging. The frontend edits examples, submits the current Python3 code, and renders the trace produced from that submitted code.
+The Python backend is the source of truth for execution and judging. The frontend edits examples, submits the current Python3 code for grid algorithms, and renders the trace produced from that submitted code. Weighted graph algorithms currently use the direct trace endpoint so the graph-specific visualization contract can stay focused on costs, relaxations, and value labels.
 
 ## Live Code Evaluation
 
